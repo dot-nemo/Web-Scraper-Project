@@ -21,14 +21,15 @@ class WebsiteSpider(scrapy.Spider):
   ]
 
   def __init__(self, url=None, *args, **kwargs):
+    global website_queue
     super(WebsiteSpider, self).__init__(*args, **kwargs)
     self.start_urls = [url]  # Use the provided URL
+    website_queue.put(url)
+
 
   def parse(self, response):
     global website_queue
     url = str(response.request.url)
-    website_queue.put(url)
-    self.result_list.append(url)
     for anchor in response.css('a::attr(href)'):
       path = str(anchor).strip()
 
@@ -46,6 +47,7 @@ class WebsiteSpider(scrapy.Spider):
           if filex in path:
             raise
         if path not in self.result_list and path not in self.todo_list:
+          website_queue.put(path)
           self.todo_list.append(path)
       except:
         pass
@@ -56,6 +58,7 @@ class WebsiteSpider(scrapy.Spider):
     #       'email': self.decodeEmail(anchor.css('.__cf_email__::attr(data-cfemail)').extract_first())
     #     }
 
+    self.result_list.append(url)
     next_page = self.todo_list.pop(0)
 
     yield scrapy.Request(
