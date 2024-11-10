@@ -19,7 +19,7 @@ def main(arg1, arg2):
   t1.start()
   print(website_queue)
 
-  minutes = int(arg2) * 5
+  minutes = int(arg2) * 60
 
   c_threads=[]
   for i in range(2):
