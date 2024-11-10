@@ -1,4 +1,4 @@
-# Scrapy settings for dlsu_email project
+# Scrapy settings for dlsu_website project
 #
 # For simplicity, this file contains only settings considered important or
 # commonly used. You can find more settings consulting the documentation:
@@ -7,14 +7,14 @@
 #     https://docs.scrapy.org/en/latest/topics/downloader-middleware.html
 #     https://docs.scrapy.org/en/latest/topics/spider-middleware.html
 
-BOT_NAME = "dlsu_email"
+BOT_NAME = "dlsu_website"
 
-SPIDER_MODULES = ["dlsu_email.spiders"]
-NEWSPIDER_MODULE = "dlsu_email.spiders"
+SPIDER_MODULES = ["dlsu_website.spiders"]
+NEWSPIDER_MODULE = "dlsu_website.spiders"
 
 
 # Crawl responsibly by identifying yourself (and your website) on the user-agent
-#USER_AGENT = "dlsu_email (+http://www.yourdomain.com)"
+#USER_AGENT = "dlsu_website (+http://www.yourdomain.com)"
 
 # Obey robots.txt rules
 ROBOTSTXT_OBEY = True
@@ -45,15 +45,15 @@ ROBOTSTXT_OBEY = True
 # Enable or disable spider middlewares
 # See https://docs.scrapy.org/en/latest/topics/spider-middleware.html
 #SPIDER_MIDDLEWARES = {
-#    "dlsu_email.middlewares.DlsuEmailSpiderMiddleware": 543,
+#    "dlsu_website.middlewares.DlsuWebsiteSpiderMiddleware": 543,
 #}
 
 # Enable or disable downloader middlewares
 # See https://docs.scrapy.org/en/latest/topics/downloader-middleware.html
-#DOWNLOADER_MIDDLEWARES = {
-#    "dlsu_email.middlewares.DlsuEmailDownloaderMiddleware": 543,
-#}
-
+# DOWNLOADER_MIDDLEWARES = {
+#     "dlsu_website.middlewares.DlsuWebsiteDownloaderMiddleware": 543,
+# }
+# HTTPERROR_ALLOWED_CODES = [404, 500]
 # Enable or disable extensions
 # See https://docs.scrapy.org/en/latest/topics/extensions.html
 #EXTENSIONS = {
@@ -63,7 +63,7 @@ ROBOTSTXT_OBEY = True
 # Configure item pipelines
 # See https://docs.scrapy.org/en/latest/topics/item-pipeline.html
 #ITEM_PIPELINES = {
-#    "dlsu_email.pipelines.DlsuEmailPipeline": 300,
+#    "dlsu_website.pipelines.DlsuWebsitePipeline": 300,
 #}
 
 # Enable and configure the AutoThrottle extension (disabled by default)
@@ -91,3 +91,5 @@ ROBOTSTXT_OBEY = True
 REQUEST_FINGERPRINTER_IMPLEMENTATION = "2.7"
 TWISTED_REACTOR = "twisted.internet.asyncioreactor.AsyncioSelectorReactor"
 FEED_EXPORT_ENCODING = "utf-8"
+
+LOG_ENABLED = 'False'

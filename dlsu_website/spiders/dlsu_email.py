@@ -1,8 +1,8 @@
 import scrapy
 
 
-class DlsuEmailSpider(scrapy.Spider):
-  name = "dlsu_email"
+class CCSEmailSpider(scrapy.Spider):
+  name = "ccs_email"
   allowed_domains = ["www.dlsu.edu.ph"]
   start_urls = ["https://www.dlsu.edu.ph/colleges/ccs/faculty-profile/"]
 
@@ -12,21 +12,23 @@ class DlsuEmailSpider(scrapy.Spider):
     DEPARTMENT_SELECTOR = '.breadcrumbs'
 
     try:
+
       for body in response.css(CONTENT_SELECTOR):
-        yield {
-          'name': body.css('span::text').extract_first(),
-          'email': self.decodeEmail(body.css('.__cf_email__::attr(data-cfemail)').extract_first()),
-        }
+          name = body.css('span::text').extract_first()
+          email = self.decodeEmail(body.css('.__cf_email__::attr(data-cfemail)').extract_first())
 
       for body in response.css(POSITION_SELECTOR):
-        yield {
-          'position': body.css('p::text').extract_first()
-        }
+          position = body.css('p::text').extract_first()
 
       for body in response.css(DEPARTMENT_SELECTOR):
-        yield {
-          'department': body.css('li > a::attr(title)').extract()[2]
-        }
+          department = body.css('li > a::attr(title)').extract()[2]
+
+      yield {
+         'name': name,
+         'email': email,
+         'position': position,
+         'department': department,
+      }
     except:
       pass
 
