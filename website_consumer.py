@@ -23,8 +23,7 @@ class WebsiteConsumer(threading.Thread):
     while not self._stop_event.is_set():
       results = []
       def crawler_results(signal, sender, item, response, spider):
-        if getattr(spider, 'thread_id', None) == threading.get_ident():
-          results.append(item)
+        results.append(item)
 
       dispatcher.connect(crawler_results, signal=signals.item_scraped)
 
