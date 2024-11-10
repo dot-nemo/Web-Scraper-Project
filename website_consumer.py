@@ -23,7 +23,8 @@ class WebsiteConsumer(threading.Thread):
     while not self._stop_event.is_set():
       results = []
       def crawler_results(signal, sender, item, response, spider):
-        results.append(item)
+        if self.thread_id == spider.id:
+          results.append(item)
 
       dispatcher.connect(crawler_results, signal=signals.item_scraped)
 
@@ -34,7 +35,8 @@ class WebsiteConsumer(threading.Thread):
 
       print(f"Consumer {self.thread_id} processing {self.item}")
 
-      process.crawl(EmailSpider, url=self.item)
+      process.stop()
+      process.crawl(EmailSpider, url=self.item, id=self.thread_id)
 
       if len(results) > 0:
         for item in results:
@@ -42,8 +44,8 @@ class WebsiteConsumer(threading.Thread):
 
           if item not in self.list:
             self.list.append(item)
-
-    print(f"Consumer {self.thread_id} processed: \n {self.list}")
+    output = f"Consumer {self.thread_id} processed: \n {self.list}"
+    print(output)
 
   def stop(self):
     self._stop_event.set()

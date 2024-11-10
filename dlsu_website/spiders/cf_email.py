@@ -4,9 +4,11 @@ class EmailSpider(scrapy.Spider):
   name = "email"
   allowed_domains = ["www.dlsu.edu.ph"]
 
-  def __init__(self, url=None, *args, **kwargs):
+  def __init__(self, url=None, id=None, *args, **kwargs):
     super(EmailSpider, self).__init__(*args, **kwargs)
     self.start_urls = [url]  # Use the provided URL
+    self.id = id
+
 
   def parse(self, response):
     for element in response.css('.__cf_email__'):
