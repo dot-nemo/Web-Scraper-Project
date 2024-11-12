@@ -47,7 +47,7 @@ class WebsiteSpider(scrapy.Spider):
         for filex in self.filetype_list:
           if filex in path:
             raise
-        if path not in self.result_list and path not in self.todo_list:
+        if path not in self.result_list and path not in self.todo_list and "email-protection" not in path:
           website_queue.put(path)
           self.todo_list.append(path)
       except:
