@@ -11,15 +11,15 @@ import time
 import sys
 
 def main(arg1, arg2):
-  runner = CrawlerProcess(get_project_settings())
+  process = CrawlerProcess(get_project_settings())
 
-  runner.crawl(WebsiteSpider, url=arg1)
+  process.crawl(WebsiteSpider, url=arg1)
 
-  t1 = threading.Thread(target=runner.start)
+  t1 = threading.Thread(target=process.start)
   t1.start()
   print(website_queue)
 
-  minutes = int(arg2) * 30
+  minutes = int(arg2) * 60
 
   c_threads=[]
   for i in range(2):
@@ -30,7 +30,7 @@ def main(arg1, arg2):
   for _ in range(minutes):
     time.sleep(1)
 
-  runner.stop()
+  process.stop()
 
   for c in c_threads:
     c.stop()

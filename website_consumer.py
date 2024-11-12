@@ -13,7 +13,7 @@ class WebsiteConsumer(threading.Thread):
   def __init__(self, id):
     threading.Thread.__init__(self)
     self.item=""
-    self.list=[]
+    self.result_dict={}
     self.thread_id = id
     self._stop_event = threading.Event()
 
@@ -25,7 +25,8 @@ class WebsiteConsumer(threading.Thread):
     while not self._stop_event.is_set():
       results = []
       def crawler_results(signal, sender, item, response, spider):
-        results.append(item)
+        if self.thread_id == spider.id:
+          results.append(item)
 
       dispatcher.connect(crawler_results, signal=signals.item_scraped)
 
@@ -36,23 +37,24 @@ class WebsiteConsumer(threading.Thread):
 
       print(f"Consumer {self.thread_id} processing {self.item}")
 
-      process.crawl(EmailSpider, url=self.item)
+      process.stop()
+      process.crawl(EmailSpider, url=self.item, id=self.thread_id)
 
       if len(results) > 0:
         for item in results:
-          item = item["email"]
+          email = item["email"]
+          del item["email"]
+          self.result_dict[email] = item
 
-          if item not in self.list:
-            self.list.append(item)
+    output = f"Consumer {self.thread_id} processed: \n {self.result_dict}"
+    print(output)
+    # with open('emails.csv', 'w', newline='') as csvfile:
+    #   fieldnames = ['email']
+    #   writer = csv.DictWriter(csvfile, fieldnames=fieldnames)
 
-    print(f"Consumer {self.thread_id} processed: \n {self.list}")
-    with open('emails.csv', 'w', newline='') as csvfile:
-      fieldnames = ['email']
-      writer = csv.DictWriter(csvfile, fieldnames=fieldnames)
-
-      writer.writeheader()
-      for i in self.list:
-        writer.writerow({'email': i})
+    #   writer.writeheader()
+    #   for i in self.list:
+    #     writer.writerow({'email': i})
 
   def stop(self):
     self._stop_event.set()
