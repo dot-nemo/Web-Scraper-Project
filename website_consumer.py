@@ -7,6 +7,8 @@ from scrapy import signals
 
 import threading, time
 
+import csv
+
 class WebsiteConsumer(threading.Thread):
   def __init__(self, id):
     threading.Thread.__init__(self)
@@ -44,6 +46,13 @@ class WebsiteConsumer(threading.Thread):
             self.list.append(item)
 
     print(f"Consumer {self.thread_id} processed: \n {self.list}")
+    with open('emails.csv', 'w', newline='') as csvfile:
+      fieldnames = ['email']
+      writer = csv.DictWriter(csvfile, fieldnames=fieldnames)
+
+      writer.writeheader()
+      for i in self.list:
+        writer.writerow({'email': i})
 
   def stop(self):
     self._stop_event.set()
