@@ -6,6 +6,8 @@ from dlsu_website.spiders.dlsu_website import WebsiteSpider, website_queue
 
 from website_consumer import WebsiteConsumer
 
+from toCsv import ToCSV
+
 import threading
 import time
 import sys
@@ -21,9 +23,13 @@ def main(arg1, arg2):
 
   minutes = int(arg2) * 60
 
+  n_threads = 1
+
+  toCsv = ToCSV()
+
   c_threads=[]
-  for i in range(2):
-    t = WebsiteConsumer(i)
+  for i in range(n_threads):
+    t = WebsiteConsumer(i, toCsv)
     c_threads.append(t)
     t.start()
 
@@ -35,7 +41,7 @@ def main(arg1, arg2):
   for c in c_threads:
     c.stop()
 
-
+  toCsv.toCsv()
 
 if __name__ == "__main__":
   # if len(sys.argv) != 3:
