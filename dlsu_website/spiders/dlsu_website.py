@@ -1,6 +1,7 @@
 import scrapy
 import queue
 import threading
+from urllib.parse import urlsplit
 
 website_queue = queue.Queue()
 
@@ -40,7 +41,7 @@ class WebsiteSpider(scrapy.Spider):
       if path and path[-1] == '/':
         path = path[:-1]
 
-      if "www.dlsu.edu.ph" not in path:
+      if "www.dlsu.edu.ph" not in urlsplit(path).netloc:
         continue
 
       try:
