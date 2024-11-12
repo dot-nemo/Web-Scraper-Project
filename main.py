@@ -22,7 +22,7 @@ def main(arg1, arg2, arg3):
 
   minutes = int(arg2) * 60
 
-  n_threads = arg3
+  n_threads = int(arg3)
 
   toCsv = ToCSV()
 
@@ -37,8 +37,14 @@ def main(arg1, arg2, arg3):
 
   process.stop()
 
+  website_count = 0
   for c in c_threads:
+    website_count += c.getCount()
     c.stop()
+
+  email_count = toCsv.getEmailCount()
+  print(website_count)
+  print(email_count)
 
   toCsv.toCsv()
 
