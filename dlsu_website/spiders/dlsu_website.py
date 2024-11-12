@@ -64,6 +64,7 @@ class WebsiteSpider(scrapy.Spider):
 
     yield scrapy.Request(
       response.urljoin(next_page),
+      dont_filter=True
     )
 
   # def decodeEmail(self, e):
