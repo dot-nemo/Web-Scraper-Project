@@ -11,7 +11,7 @@ class WebsiteConsumer(threading.Thread):
   def __init__(self, id):
     threading.Thread.__init__(self)
     self.item=""
-    self.list=[]
+    self.result_dict={}
     self.thread_id = id
     self._stop_event = threading.Event()
 
@@ -40,11 +40,11 @@ class WebsiteConsumer(threading.Thread):
 
       if len(results) > 0:
         for item in results:
-          item = item["email"]
+          email = item["email"]
+          del item["email"]
+          self.result_dict[email] = item
 
-          if item not in self.list:
-            self.list.append(item)
-    output = f"Consumer {self.thread_id} processed: \n {self.list}"
+    output = f"Consumer {self.thread_id} processed: \n {self.result_dict}"
     print(output)
 
   def stop(self):
