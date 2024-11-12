@@ -16,6 +16,11 @@ class WebsiteSpider(scrapy.Spider):
 
   todo_list = []
 
+  ignore = [
+    "https://www.dlsu.edu.ph/offices/ovplm/lasallian-reflection-framework/",
+    "https://www.dlsu.edu.ph/lasallianmission/lasallian-reflection-framework/"
+  ]
+
   filetype_list = [
     '.pdf',
     '.png',
@@ -48,7 +53,7 @@ class WebsiteSpider(scrapy.Spider):
         for filex in self.filetype_list:
           if filex in path:
             raise
-        if path not in self.result_list and path not in self.todo_list and "email-protection" not in path:
+        if path not in self.result_list and path not in self.todo_list and "email-protection" not in path and path not in self.ignore:
           website_queue.put(path)
           self.todo_list.append(path)
       except:
