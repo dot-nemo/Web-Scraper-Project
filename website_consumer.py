@@ -4,16 +4,20 @@ from scrapy.utils.project import get_project_settings
 from dlsu_website.spiders.cf_email import EmailSpider
 from scrapy.signalmanager import dispatcher
 from scrapy import signals
+from toCsv import ToCSV
 
 import threading, time
 
+import csv
+
 class WebsiteConsumer(threading.Thread):
-  def __init__(self, id):
+  def __init__(self, id, toCsv):
     threading.Thread.__init__(self)
     self.item=""
-    self.list=[]
+    self.result_dict={}
     self.thread_id = id
     self._stop_event = threading.Event()
+    self.toCsv = toCsv
 
   def run(self):
     process = CrawlerProcess(get_project_settings())
@@ -40,11 +44,12 @@ class WebsiteConsumer(threading.Thread):
 
       if len(results) > 0:
         for item in results:
-          item = item["email"]
+          email = item["email"]
+          del item["email"]
+          self.result_dict[email] = item
+          self.toCsv.addItem(email, self.result_dict[email]['firstname'], self.result_dict[email]['lastname'])
 
-          if item not in self.list:
-            self.list.append(item)
-    output = f"Consumer {self.thread_id} processed: \n {self.list}"
+    output = f"Consumer {self.thread_id} processed: \n {self.result_dict}"
     print(output)
 
   def stop(self):
