@@ -12,18 +12,17 @@ import threading
 import time
 import sys
 
-def main(arg1, arg2):
+def main(arg1, arg2, arg3):
   process = CrawlerProcess(get_project_settings())
 
   process.crawl(WebsiteSpider, url=arg1)
 
   t1 = threading.Thread(target=process.start)
   t1.start()
-  print(website_queue)
 
   minutes = int(arg2) * 60
 
-  n_threads = 1
+  n_threads = arg3
 
   toCsv = ToCSV()
 
@@ -44,8 +43,10 @@ def main(arg1, arg2):
   toCsv.toCsv()
 
 if __name__ == "__main__":
-  # if len(sys.argv) != 3:
-  #   print("Usage: python main.py <url> <minutes>")
-  # else:
-  #   main(sys.argv[1], sys.argv[2])
-  main("https://www.dlsu.edu.ph", 1)
+  if len(sys.argv) < 3:
+    print("Usage: python main.py <url> <minutes> [threads]")
+  else:
+    count = 2
+    if len(sys.argv) == 4:
+      count = sys.argv[3]
+    main(sys.argv[1], sys.argv[2], count)
