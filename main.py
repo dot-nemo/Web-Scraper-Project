@@ -10,7 +10,7 @@ import threading
 import time
 import sys
 
-def main(arg1, arg2):
+def main(arg1, arg2, arg3):
   process = CrawlerProcess(get_project_settings())
 
   process.crawl(WebsiteSpider, url=arg1)
@@ -22,7 +22,7 @@ def main(arg1, arg2):
   minutes = int(arg2) * 60
 
   c_threads=[]
-  for i in range(2):
+  for i in range(arg3):
     t = WebsiteConsumer(i)
     c_threads.append(t)
     t.start()
@@ -38,8 +38,12 @@ def main(arg1, arg2):
 
 
 if __name__ == "__main__":
-  # if len(sys.argv) != 3:
-  #   print("Usage: python main.py <url> <minutes>")
-  # else:
-  #   main(sys.argv[1], sys.argv[2])
-  main("https://www.dlsu.edu.ph", 1)
+  if len(sys.argv) < 3:
+    print("Usage: python main.py <url> <minutes> [number of threads]")
+  else:
+    if len(sys.argv) == 4:
+      threads = int(sys.argv[3])
+    else:
+      threads = 2
+    main(sys.argv[1], sys.argv[2], threads)
+  # main("https://www.dlsu.edu.ph", 1)
