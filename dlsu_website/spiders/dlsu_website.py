@@ -18,6 +18,7 @@ class WebsiteSpider(scrapy.Spider):
   filetype_list = [
     '.pdf',
     '.png',
+    '.jpg',
   ]
 
   def __init__(self, url=None, *args, **kwargs):
