@@ -8,6 +8,23 @@ class EmailSpider(scrapy.Spider):
     "De La Salle University",
   ]
 
+  affixes = [
+    "Dr.",
+    "Dr",
+    "PhD",
+    "Ph.D",
+    "Ph.d",
+    "Ph.d.",
+    "Ms.",
+    "Ms",
+    "Mr.",
+    "Mr",
+    "Engr.",
+    "Engr",
+    "Atty.",
+    "Atty",
+  ]
+
   def __init__(self, url=None, id=None, *args, **kwargs):
     super(EmailSpider, self).__init__(*args, **kwargs)
     self.start_urls = [url]  # Use the provided URL
@@ -29,6 +46,7 @@ class EmailSpider(scrapy.Spider):
                 if len(narrowed_name) < 950 and not any(banned_names in narrowed_name for banned_names in self.non_names):
                   split_name = narrowed_name.replace(",", "").split(" ")
                   if len(split_name) > longest_name:
+                    split_name = [item for item in split_name if item not in self.affixes]
                     firstname = lastname = ""
                     if "," in narrowed_name:
                       lastname = split_name[0].capitalize()
