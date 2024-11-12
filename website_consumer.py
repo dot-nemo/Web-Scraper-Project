@@ -18,6 +18,7 @@ class WebsiteConsumer(threading.Thread):
     self.thread_id = id
     self._stop_event = threading.Event()
     self.toCsv = toCsv
+    self.count = 0
 
   def run(self):
     process = CrawlerProcess(get_project_settings())
@@ -49,8 +50,15 @@ class WebsiteConsumer(threading.Thread):
           self.result_dict[email] = item
           self.toCsv.addItem(email, self.result_dict[email]['firstname'], self.result_dict[email]['lastname'])
 
-    output = f"Consumer {self.thread_id} processed: \n {self.result_dict}"
-    print(output)
+      self.count += 1
+
+    # output = f"Consumer {self.thread_id} processed: \n {self.result_dict}"
+    # print(output)
+
+
 
   def stop(self):
     self._stop_event.set()
+
+  def getCount(self):
+    return self.count

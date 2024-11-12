@@ -5,10 +5,10 @@ class ToCSV() :
     def __init__(self):
         self.lock = threading.Lock()
         self.emailsDict = {}
-    
+
     def read(self):
         return self.emailsDict
-    
+
     def addItem(self, email, firstname, lastname):
         with self.lock:
             self.emailsDict.update({email: {'firstname': firstname, 'lastname': lastname}})
@@ -20,3 +20,6 @@ class ToCSV() :
             writer.writeheader()
             for email, info in self.emailsDict.items():
                 writer.writerow({'email': email, 'first name': info['firstname'], 'last name': info['lastname']})
+
+    def getEmailCount(self):
+        return len(self.emailsDict)
