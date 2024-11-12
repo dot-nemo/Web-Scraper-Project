@@ -44,7 +44,7 @@ def main(arg1, arg2, arg3):
 
   email_count = toCsv.getEmailCount()
 
-  f = open("results.txt", "a")
+  f = open("results.txt", "w")
   f.write(f"URL: {arg1}\nNumber of pages: {website_count}\nNumber of emails: {email_count}")
   f.close()
 
