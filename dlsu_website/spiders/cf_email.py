@@ -40,10 +40,11 @@ class EmailSpider(scrapy.Spider):
           if '.' in match:
             name1, name2 = re.match(r"^([^.]+)\.([^.]+)$", match).groups()
             longest_name = 0
+            firstname = lastname = ""
             for potential_name in response.css("*::text"):
               if name1.lower() in str(potential_name).lower() and name2.lower() in str(potential_name).lower():
                 narrowed_name = str(potential_name).strip()
-                if len(narrowed_name) < 950 and not any(banned_names in narrowed_name for banned_names in self.non_names):
+                if len(narrowed_name) < 500 and not any(banned_names in narrowed_name for banned_names in self.non_names):
                   split_name = narrowed_name.replace(",", "").split(" ")
                   if len(split_name) > longest_name:
                     split_name = [item for item in split_name if item not in self.affixes]
