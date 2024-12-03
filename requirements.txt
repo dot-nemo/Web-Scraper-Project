@@ -25,10 +25,12 @@ pyasn1_modules==0.4.1
 pycparser==2.22
 PyDispatcher==2.0.7
 pyOpenSSL==24.2.1
+Pyro4==4.82
 queuelib==1.7.0
 requests==2.32.3
 requests-file==2.1.0
 Scrapy==2.11.2
+serpent==1.41
 service-identity==24.2.0
 setuptools==75.2.0
 tldextract==5.1.2
