@@ -2,13 +2,16 @@ from scrapy.crawler import CrawlerProcess
 from scrapy.utils.project import get_project_settings
 import Pyro4
 
-from dlsu_website.spiders.dlsu_website import WebsiteSpider
+from dlsu_website.spiders.dlsu_website import WebsiteSpider, website_queue
 
 from toCsv import ToCSV
 
 import threading
 import time
 import sys
+from toCsv import ToCSV
+
+import pika, json
 
 def main(arg1, arg2, arg3):
   process = CrawlerProcess(get_project_settings())
@@ -26,9 +29,24 @@ def main(arg1, arg2, arg3):
 
   process.stop()
 
-  website_count = 0
+  """Starts the Pika consumer."""
+  credentials = pika.PlainCredentials("rabbituser", "rabbit1234")
+  connection = pika.BlockingConnection(pika.ConnectionParameters("10.2.202.75", 5672, "/", credentials))
+  channel = connection.channel()
 
-  email_count = 0
+  channel.queue_declare(queue="equeue")
+
+  tocsv = ToCSV()
+
+  def callback(ch, method, properties, body):
+    body_dict = json.loads(body)
+    tocsv.addItem(body_dict['email'], body_dict['firstname'], body_dict['lastname'])
+
+  channel.basic_consume(queue="equeue", on_message_callback=callback, auto_ack=True)
+
+  website_count = website_queue.qsize()
+
+  email_count = tocsv.getEmailCount()
 
   f = open("results.txt", "w")
   f.write(f"URL: {arg1}\nNumber of pages: {website_count}\nNumber of emails: {email_count}")
