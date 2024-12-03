@@ -1,99 +1,40 @@
-import scrapy
-import queue
+from scrapy.crawler import CrawlerProcess
+from scrapy.utils.project import get_project_settings
+
+from dlsu_website.spiders.dlsu_website import WebsiteSpider
+
 import threading
+import time
+import sys
 
-import pika, json
+def main(arg1, arg2, arg3):
+  process = CrawlerProcess(get_project_settings())
 
-from urllib.parse import urlsplit
+  process.crawl(WebsiteSpider, url=arg1)
 
-website_queue = queue.Queue()
+  t1 = threading.Thread(target=process.start)
+  t1.start()
 
-class WebsiteSpider(scrapy.Spider):
-  thread_id = threading.get_ident()
-  handle_httpstatus_list = [404]
-  name = "website"
-  allowed_domains = ["www.dlsu.edu.ph"]
-  start_urls = []
+  minutes = int(arg2) * 60
 
-  result_list = []
+  for _ in range(minutes):
+    time.sleep(1)
 
-  todo_list = []
+  process.stop()
 
-  ignore = [
-    "https://www.dlsu.edu.ph/offices/ovplm/lasallian-reflection-framework/",
-    "https://www.dlsu.edu.ph/lasallianmission/lasallian-reflection-framework/"
-  ]
+  website_count = 0
 
-  filetype_list = [
-    '.pdf',
-    '.png',
-    '.jpg',
-  ]
+  email_count = 0
 
-  def __init__(self, url=None, *args, **kwargs):
-    global website_queue
-    super(WebsiteSpider, self).__init__(*args, **kwargs)
-    self.start_urls = [url]  # Use the provided URL
-    website_queue.put(url)
+  f = open("results.txt", "w")
+  f.write(f"URL: {arg1}\nNumber of pages: {website_count}\nNumber of emails: {email_count}")
+  f.close()
 
-    credentials = pika.PlainCredentials('rabbituser', 'rabbit1234')
-
-    connection = pika.BlockingConnection(pika.ConnectionParameters('10.2.202.75',5672,'/',credentials))
-    self.channel = connection.channel()
-
-    self.channel.queue_declare(queue='rqueue')
-
-
-
-
-  def parse(self, response):
-    global website_queue
-    url = str(response.request.url)
-    for anchor in response.css('a::attr(href)'):
-      path = str(anchor).strip()
-
-      if path and path[0] == '/':
-        path = 'https://www.dlsu.edu.ph' + path
-
-      if path and path[-1] == '/':
-        path = path[:-1]
-
-      if "www.dlsu.edu.ph" not in urlsplit(path).netloc:
-        continue
-
-      try:
-        for filex in self.filetype_list:
-          if filex in path:
-            raise
-        if path not in self.result_list and path not in self.todo_list and "email-protection" not in path and path not in self.ignore:
-          msg_dict={'name':'webcrawler', 'url': path}
-          msg_json=json.dumps(msg_dict)
-          self.channel.basic_publish(exchange='', routing_key='rqueue', body=msg_json)
-          print(" [x] Sent '%s'", path)
-          website_queue.put(path)
-          self.todo_list.append(path)
-      except:
-        pass
-
-    # for anchor in response.css('a'):
-    #   if anchor.css('.__cf_email__::attr(data-cfemail)').extract_first():
-    #     yield {
-    #       'email': self.decodeEmail(anchor.css('.__cf_email__::attr(data-cfemail)').extract_first())
-    #     }
-
-    self.result_list.append(url)
-    next_page = self.todo_list.pop(0)
-
-    yield scrapy.Request(
-      response.urljoin(next_page),
-      dont_filter=True
-    )
-
-  # def decodeEmail(self, e):
-  #   de = ""
-  #   k = int(e[:2], 16)
-
-  #   for i in range(2, len(e)-1, 2):
-  #     de += chr(int(e[i:i+2], 16)^k)
-
-  #   return de
+if __name__ == "__main__":
+  if len(sys.argv) < 3:
+    print("Usage: python _web_crawler.py <url> <minutes> [nodes]")
+  else:
+    count = 2
+    if len(sys.argv) == 4:
+      count = sys.argv[3]
+    main(sys.argv[1], sys.argv[2], count)
