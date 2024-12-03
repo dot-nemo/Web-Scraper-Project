@@ -23,7 +23,7 @@ class WebsiteConsumer(threading.Thread):
     self.count = 0
     if self.toCsv == None:
       ns=Pyro4.locateNS("10.2.202.75", 9090)
-      uri=ns.lookup("ToCSV")
+      uri=ns.lookup("csv")
       print(uri)
       self.toCsv = Pyro4.Proxy(uri)
 
