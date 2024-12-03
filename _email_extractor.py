@@ -9,6 +9,7 @@ from scrapy.signalmanager import dispatcher
 from scrapy import signals
 import pika, json
 from twisted.internet import reactor, threads
+import Pyro4
 
 
 class WebsiteConsumer:
@@ -17,6 +18,22 @@ class WebsiteConsumer:
         self.thread_id = id
         self.toCsv = toCsv
         self.count = 0
+        if self.toCsv == None:
+          ns=Pyro4.locateNS("10.2.202.75", 9090)
+          uri=ns.lookup("csv")
+          print(uri)
+          self.toCsv = Pyro4.Proxy(uri)
+        try:
+          credentials = pika.PlainCredentials('rabbituser', 'rabbit1234')
+
+          connection = pika.BlockingConnection(pika.ConnectionParameters('10.2.202.75',5672,'/',credentials))
+          self.channel = connection.channel()
+
+          self.channel.queue_declare(queue='rqueue')
+          print("Connected to RabbitMQ")
+          self.channel.basic_consume('rqueue', self.callback, True)
+        except:
+          print("Unable to connect to RabbitMQ")
 
     def process_url(self, url):
         runner = CrawlerRunner(get_project_settings())
@@ -41,8 +58,7 @@ class WebsiteConsumer:
                 email = item["email"]
                 del item["email"]
                 self.result_dict[email] = item
-                # Optional: Process result for CSV
-                # self.toCsv.addItem(email, self.result_dict[email]['firstname'], self.result_dict[email]['lastname'])
+                self.toCsv.addItem(email, self.result_dict[email]['firstname'], self.result_dict[email]['lastname'])
         self.count += 1
 
     def callback(self, ch, method, properties, body):
