@@ -1,6 +1,9 @@
 import scrapy
 import queue
 import threading
+
+import pika, json
+
 from urllib.parse import urlsplit
 
 website_queue = queue.Queue()
@@ -32,7 +35,16 @@ class WebsiteSpider(scrapy.Spider):
     super(WebsiteSpider, self).__init__(*args, **kwargs)
     self.start_urls = [url]  # Use the provided URL
     website_queue.put(url)
+    try:
+      credentials = pika.PlainCredentials('rabbituser', 'rabbit1234')
 
+      connection = pika.BlockingConnection(pika.ConnectionParameters('10.2.202.75',5672,'/',credentials))
+      self.channel = connection.channel()
+
+      self.channel.queue_declare(queue='rqueue')
+      print("Connected to RabbitMQ")
+    except:
+      print("Unable to connect to RabbitMQ")
 
   def parse(self, response):
     global website_queue
@@ -54,6 +66,14 @@ class WebsiteSpider(scrapy.Spider):
           if filex in path:
             raise
         if path not in self.result_list and path not in self.todo_list and "email-protection" not in path and path not in self.ignore:
+          msg_dict={'name':'webcrawler', 'url': path}
+          msg_json=json.dumps(msg_dict)
+          try:
+            self.channel.basic_publish(exchange='', routing_key='rqueue', body=msg_json)
+            print(" [x] Sent '%s'", path)
+          except:
+            pass
+          print(path)
           website_queue.put(path)
           self.todo_list.append(path)
       except:
