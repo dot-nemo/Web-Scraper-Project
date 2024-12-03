@@ -71,7 +71,7 @@ class WebsiteSpider(scrapy.Spider):
             msg_json=json.dumps(msg_dict)
             try:
               self.channel.basic_publish(exchange='', routing_key='rqueue', body=msg_json)
-              print(" [x] Sent '%s'", path)
+              print(" [x] Sent '%s'\r", path)
             except:
               pass
             website_queue.put(path)
