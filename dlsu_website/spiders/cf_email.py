@@ -32,6 +32,7 @@ class EmailSpider(scrapy.Spider):
 
 
   def parse(self, response):
+    print(self.start_urls[0])
     for element in response.css('.__cf_email__'):
       if element.css('.__cf_email__::attr(data-cfemail)').extract_first():
         email=self.decodeEmail(element.css('.__cf_email__::attr(data-cfemail)').extract_first())

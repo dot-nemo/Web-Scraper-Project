@@ -28,7 +28,6 @@ class WebsiteConsumer():
     dispatcher.connect(crawler_results, signal=signals.item_scraped)
 
     process.crawl(EmailSpider, url=url, id=self.thread_id)
-    process.start()
 
     if len(results) > 0:
       for item in results:
