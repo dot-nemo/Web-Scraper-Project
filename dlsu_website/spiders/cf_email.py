@@ -1,5 +1,6 @@
 import scrapy
 import re
+import pika, json
 
 class EmailSpider(scrapy.Spider):
   name = "email"
@@ -29,11 +30,22 @@ class EmailSpider(scrapy.Spider):
     super(EmailSpider, self).__init__(*args, **kwargs)
     self.start_urls = [url]  # Use the provided URL
     self.id = id
+    try:
+      credentials = pika.PlainCredentials('rabbituser', 'rabbit1234')
+
+      connection = pika.BlockingConnection(pika.ConnectionParameters('10.2.202.75',5672,'/',credentials))
+      self.channel = connection.channel()
+
+      self.channel.queue_declare(queue='equeue')
+      print("Connected to RabbitMQ")
+    except:
+      print("Unable to connect to RabbitMQ")
 
 
   def parse(self, response):
     for element in response.css('.__cf_email__'):
       if element.css('.__cf_email__::attr(data-cfemail)').extract_first():
+        firstname = lastname = ""
         email=self.decodeEmail(element.css('.__cf_email__::attr(data-cfemail)').extract_first())
         try:
           match, _ = re.match("^([^@]+)@(.+)$", email).groups()
@@ -62,7 +74,14 @@ class EmailSpider(scrapy.Spider):
         except:
           pass
         if email:
-          print(email)
+          msg_dict={
+            'email': email,
+            'firstname': firstname,
+            'lastname': lastname
+          }
+          msg_json=json.dumps(msg_dict)
+          self.channel.basic_publish(exchange='', routing_key='rqueue', body=msg_json)
+          print(" [x] Sent '%s'", email, end="\r")
         yield {
           'email': email,
           'firstname': firstname,
