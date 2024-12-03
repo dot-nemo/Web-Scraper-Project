@@ -80,7 +80,7 @@ class EmailSpider(scrapy.Spider):
             'lastname': lastname
           }
           msg_json=json.dumps(msg_dict)
-          self.channel.basic_publish(exchange='', routing_key='rqueue', body=msg_json)
+          self.channel.basic_publish(exchange='', routing_key='equeue', body=msg_json)
           print(" [x] Sent '%s'", email, end="\r")
         yield {
           'email': email,
