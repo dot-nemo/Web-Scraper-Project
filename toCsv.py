@@ -1,17 +1,20 @@
 import csv
 import threading
+import Pyro4
 
+@Pyro4.expose
 class ToCSV() :
+    lock = threading.Lock()
     def __init__(self):
-        self.lock = threading.Lock()
         self.emailsDict = {}
 
     def read(self):
         return self.emailsDict
 
     def addItem(self, email, firstname, lastname):
-        with self.lock:
+        with ToCSV.lock:
             self.emailsDict.update({email: {'firstname': firstname, 'lastname': lastname}})
+            self.toCsv()
 
     def toCsv(self):
         with open('emails.csv', 'w', newline='') as csvfile:
