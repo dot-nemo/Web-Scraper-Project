@@ -34,15 +34,21 @@ def main(arg1, arg2, arg3):
   connection = pika.BlockingConnection(pika.ConnectionParameters("10.2.202.75", 5672, "/", credentials))
   channel = connection.channel()
 
-  channel.queue_declare(queue="equeue")
+  q = channel.queue_declare(queue="equeue")
+  q = q.method.message_count
 
   tocsv = ToCSV()
 
   def callback(ch, method, properties, body):
     body_dict = json.loads(body)
     tocsv.addItem(body_dict['email'], body_dict['firstname'], body_dict['lastname'])
+    q = q - 1
+    if q == 0:
+      channel.stop_consuming()
 
   channel.basic_consume(queue="equeue", on_message_callback=callback, auto_ack=True)
+
+  channel.start_consuming()
 
   website_count = website_queue.qsize()
 
