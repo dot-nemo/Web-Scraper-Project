@@ -34,11 +34,11 @@ class WebsiteConsumer:
         runner = CrawlerRunner(get_project_settings())
         results = []
 
-        def crawler_results(signal, sender, item, response, spider):
-            if self.thread_id == spider.id:
-                results.append(item)
+        # def crawler_results(signal, sender, item, response, spider):
+        #     if self.thread_id == spider.id:
+        #         results.append(item)
 
-        dispatcher.connect(crawler_results, signal=signals.item_scraped)
+        # dispatcher.connect(crawler_results, signal=signals.item_scraped)
 
         # Schedule the crawl
         d = runner.crawl(EmailSpider, url=url, id=self.thread_id)
