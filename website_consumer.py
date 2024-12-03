@@ -5,13 +5,14 @@ from dlsu_website.spiders.cf_email import EmailSpider
 from scrapy.signalmanager import dispatcher
 from scrapy import signals
 from toCsv import ToCSV
+import pika, json
 
 import threading, time
 
 import csv
 
 class WebsiteConsumer(threading.Thread):
-  def __init__(self, id, toCsv):
+  def __init__(self, id, toCsv=None):
     threading.Thread.__init__(self)
     self.item=""
     self.result_dict={}
@@ -20,37 +21,54 @@ class WebsiteConsumer(threading.Thread):
     self.toCsv = toCsv
     self.count = 0
 
-  def run(self):
+
+    try:
+      credentials = pika.PlainCredentials('rabbituser', 'rabbit1234')
+
+      connection = pika.BlockingConnection(pika.ConnectionParameters('10.2.202.75',5672,'/',credentials))
+      self.channel = connection.channel()
+
+      self.channel.queue_declare(queue='rqueue')
+      print("Connected to RabbitMQ")
+      self.channel.basic_consume('rqueue', self.callback)
+    except:
+      print("Unable to connect to RabbitMQ")
+
+  def callback(self, ch, method, properties, body):
+    self.results = []
+    def crawler_results(signal, sender, item, response, spider):
+      if self.thread_id == spider.id:
+        self.results.append(item)
+
     process = CrawlerProcess(get_project_settings())
-    self.running = True
-    print(f"Consumer {self.thread_id} is waiting\n")
+    print(" [x] Received %r" % body)
 
-    while not self._stop_event.is_set():
-      results = []
-      def crawler_results(signal, sender, item, response, spider):
-        if self.thread_id == spider.id:
-          results.append(item)
+    # parse body here
+    body_dict = json.loads(body)
+    self.item = body_dict["url"]
 
-      dispatcher.connect(crawler_results, signal=signals.item_scraped)
+    print(f"Consumer {self.thread_id} processing {self.item}")
 
-      try:
-        self.item = website_queue.get(timeout=3)
-      except:
-        continue
+    process.stop()
+    process.crawl(EmailSpider, url=self.item, id=self.thread_id)
 
-      print(f"Consumer {self.thread_id} processing {self.item}")
+    dispatcher.connect(crawler_results, signal=signals.item_scraped)
 
-      process.stop()
-      process.crawl(EmailSpider, url=self.item, id=self.thread_id)
-
-      if len(results) > 0:
-        for item in results:
-          email = item["email"]
-          del item["email"]
-          self.result_dict[email] = item
+    if len(self.results) > 0:
+      for item in self.results:
+        email = item["email"]
+        del item["email"]
+        self.result_dict[email] = item
+        if self.toCsv != None:
           self.toCsv.addItem(email, self.result_dict[email]['firstname'], self.result_dict[email]['lastname'])
+        else:
+          print("%s %s %s", email, self.result_dict[email]['firstname'], self.result_dict[email]['lastname'])
 
-      self.count += 1
+    self.count += 1
+
+
+  def run(self):
+    self.running = True
 
     # output = f"Consumer {self.thread_id} processed: \n {self.result_dict}"
     # print(output)
