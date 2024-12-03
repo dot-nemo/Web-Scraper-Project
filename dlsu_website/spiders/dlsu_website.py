@@ -10,7 +10,7 @@ website_queue = queue.Queue()
 
 class WebsiteSpider(scrapy.Spider):
   thread_id = threading.get_ident()
-  handle_httpstatus_list = [404]
+  handle_httpstatus_list = [404, 301]
   name = "website"
   allowed_domains = ["www.dlsu.edu.ph"]
   start_urls = []
@@ -48,48 +48,53 @@ class WebsiteSpider(scrapy.Spider):
 
   def parse(self, response):
     global website_queue
-    url = str(response.request.url)
-    for anchor in response.css('a::attr(href)'):
-      path = str(anchor).strip()
+    try:
+      url = str(response.request.url)
+      for anchor in response.css('a::attr(href)'):
+        path = str(anchor).strip()
 
-      if path and path[0] == '/':
-        path = 'https://www.dlsu.edu.ph' + path
+        if path and path[0] == '/':
+          path = 'https://www.dlsu.edu.ph' + path
 
-      if path and path[-1] == '/':
-        path = path[:-1]
+        if path and path[-1] == '/':
+          path = path[:-1]
 
-      if "www.dlsu.edu.ph" not in urlsplit(path).netloc:
-        continue
+        if "www.dlsu.edu.ph" not in urlsplit(path).netloc:
+          continue
 
-      try:
-        for filex in self.filetype_list:
-          if filex in path:
-            raise
-        if path not in self.result_list and path not in self.todo_list and "email-protection" not in path and path not in self.ignore:
-          msg_dict={'name':'webcrawler', 'url': path}
-          msg_json=json.dumps(msg_dict)
-          try:
-            self.channel.basic_publish(exchange='', routing_key='rqueue', body=msg_json)
-            print(" [x] Sent '%s'", path)
-          except:
-            pass
-          website_queue.put(path)
-          self.todo_list.append(path)
-      except:
-        pass
+        try:
+          for filex in self.filetype_list:
+            if filex in path:
+              raise
+          if path not in self.result_list and path not in self.todo_list and "email-protection" not in path and path not in self.ignore:
+            msg_dict={'name':'webcrawler', 'url': path}
+            msg_json=json.dumps(msg_dict)
+            try:
+              self.channel.basic_publish(exchange='', routing_key='rqueue', body=msg_json)
+              print(" [x] Sent '%s'", path)
+            except:
+              pass
+            website_queue.put(path)
+            self.todo_list.append(path)
+        except:
+          pass
 
-    # for anchor in response.css('a'):
-    #   if anchor.css('.__cf_email__::attr(data-cfemail)').extract_first():
-    #     yield {
-    #       'email': self.decodeEmail(anchor.css('.__cf_email__::attr(data-cfemail)').extract_first())
-    #     }
-
+      # for anchor in response.css('a'):
+      #   if anchor.css('.__cf_email__::attr(data-cfemail)').extract_first():
+      #     yield {
+      #       'email': self.decodeEmail(anchor.css('.__cf_email__::attr(data-cfemail)').extract_first())
+      #     }
+    except:
+      pass
     self.result_list.append(url)
     next_page = self.todo_list.pop(0)
 
     yield scrapy.Request(
       response.urljoin(next_page),
-      dont_filter=True
+      dont_filter=True,
+      meta={
+        'dont_redirect': True
+      },
     )
 
   # def decodeEmail(self, e):
