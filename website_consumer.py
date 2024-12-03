@@ -30,7 +30,7 @@ class WebsiteConsumer(threading.Thread):
 
       self.channel.queue_declare(queue='rqueue')
       print("Connected to RabbitMQ")
-      self.channel.basic_consume('rqueue', self.callback)
+      self.channel.basic_consume('rqueue', True, self.callback)
     except:
       print("Unable to connect to RabbitMQ")
 
