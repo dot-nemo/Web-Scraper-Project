@@ -40,7 +40,6 @@ class WebsiteConsumer(threading.Thread):
       if self.thread_id == spider.id:
         self.results.append(item)
 
-    process = CrawlerProcess(get_project_settings())
     print(" [x] Received %r" % body)
 
     # parse body here
@@ -49,8 +48,8 @@ class WebsiteConsumer(threading.Thread):
 
     print(f"Consumer {self.thread_id} processing {self.item}")
 
-    process.stop()
-    process.crawl(EmailSpider, url=self.item, id=self.thread_id)
+    self.process.stop()
+    self.process.crawl(EmailSpider, url=self.item, id=self.thread_id)
 
     dispatcher.connect(crawler_results, signal=signals.item_scraped)
 
@@ -69,6 +68,7 @@ class WebsiteConsumer(threading.Thread):
 
   def run(self):
     self.running = True
+    self.process = CrawlerProcess(get_project_settings())
     self.channel.start_consuming()
     while not self._stop_event.is_set():
       pass
