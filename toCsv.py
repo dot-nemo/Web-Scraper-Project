@@ -1,8 +1,6 @@
 import csv
 import threading
-import Pyro4
 
-@Pyro4.expose
 class ToCSV() :
     lock = threading.Lock()
     def __init__(self):
