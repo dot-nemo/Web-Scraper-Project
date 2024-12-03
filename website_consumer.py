@@ -52,7 +52,7 @@ class WebsiteConsumer(threading.Thread):
     body_dict = json.loads(body)
     self.item = body_dict["url"]
 
-    print(f"Consumer {self.thread_id} processing {self.item}")
+    # print(f"Consumer {self.thread_id} processing {self.item}")
 
     self.process.stop()
     self.process.crawl(EmailSpider, url=self.item, id=self.thread_id)
