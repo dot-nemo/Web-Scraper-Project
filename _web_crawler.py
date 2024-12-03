@@ -14,6 +14,7 @@ from toCsv import ToCSV
 import pika, json
 
 def main(arg1, arg2, arg3):
+  global q
   process = CrawlerProcess(get_project_settings())
 
   process.crawl(WebsiteSpider, url=arg1)
@@ -40,6 +41,7 @@ def main(arg1, arg2, arg3):
   tocsv = ToCSV()
 
   def callback(ch, method, properties, body):
+    global q
     body_dict = json.loads(body)
     tocsv.addItem(body_dict['email'], body_dict['firstname'], body_dict['lastname'])
     q = q - 1
@@ -53,6 +55,8 @@ def main(arg1, arg2, arg3):
   website_count = website_queue.qsize()
 
   email_count = tocsv.getEmailCount()
+
+  tocsv.toCsv()
 
   f = open("results.txt", "w")
   f.write(f"URL: {arg1}\nNumber of pages: {website_count}\nNumber of emails: {email_count}")
