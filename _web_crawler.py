@@ -33,7 +33,7 @@ def main(arg1, arg2, arg3):
     print(i)
     time.sleep(1)
 
-
+  daemon.close()
   process.stop()
 
   website_count = 0
