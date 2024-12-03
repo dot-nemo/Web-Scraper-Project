@@ -1,3 +1,6 @@
+from twisted.internet import asyncioreactor
+asyncioreactor.install()
+
 from dlsu_website.spiders.dlsu_website import website_queue
 from scrapy.crawler import CrawlerRunner
 from scrapy.utils.project import get_project_settings
@@ -62,7 +65,7 @@ def start_pika_consumer():
     webcon = WebsiteConsumer(id=1)
     channel.basic_consume(queue="rqueue", on_message_callback=webcon.callback, auto_ack=True)
 
-    print(" [*] Waiting for messages. To exit press CTRL+C")
+    print(" [*] Waiting for messages. To exit press CTRL+Z")
     channel.start_consuming()
 
 
