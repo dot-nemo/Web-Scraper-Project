@@ -6,6 +6,7 @@ from scrapy.signalmanager import dispatcher
 from scrapy import signals
 from toCsv import ToCSV
 import pika, json
+import Pyro4
 
 import threading, time
 
@@ -20,6 +21,11 @@ class WebsiteConsumer(threading.Thread):
     self._stop_event = threading.Event()
     self.toCsv = toCsv
     self.count = 0
+    if self.toCsv == None:
+      ns=Pyro4.locateNS("10.2.202.75", 9090)
+      uri=ns.lookup("ToCSV")
+      print(uri)
+      self.toCsv = Pyro4.Proxy(uri)
 
 
     try:
