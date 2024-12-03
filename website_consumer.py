@@ -69,6 +69,9 @@ class WebsiteConsumer(threading.Thread):
 
   def run(self):
     self.running = True
+    self.channel.start_consuming()
+    while not self._stop_event.is_set():
+      pass
 
     # output = f"Consumer {self.thread_id} processed: \n {self.result_dict}"
     # print(output)
