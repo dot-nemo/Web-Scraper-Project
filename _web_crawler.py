@@ -20,20 +20,10 @@ def main(arg1, arg2, arg3):
 
   minutes = int(arg2) * 60
 
-  daemon=Pyro4.Daemon(host="10.2.202.75")
-  ns=Pyro4.locateNS("10.2.202.75", 9090)
-  uri=daemon.register(ToCSV)
-  print(uri)
-  ns.register("csv",uri)
-  print("ToCSV server Ready")
-  t_pyro = threading.Thread(target=daemon.requestLoop)
-  t_pyro.start()
-
   for i in range(minutes):
     print(i)
     time.sleep(1)
 
-  daemon.close()
   process.stop()
 
   website_count = 0

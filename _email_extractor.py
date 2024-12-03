@@ -18,11 +18,6 @@ class WebsiteConsumer:
         self.thread_id = id
         self.toCsv = toCsv
         self.count = 0
-        if self.toCsv == None:
-          ns=Pyro4.locateNS("10.2.202.75", 9090)
-          uri=ns.lookup("csv")
-          print(uri)
-          self.toCsv = Pyro4.Proxy(uri)
         try:
           credentials = pika.PlainCredentials('rabbituser', 'rabbit1234')
 
@@ -49,8 +44,8 @@ class WebsiteConsumer:
         d = runner.crawl(EmailSpider, url=url, id=self.thread_id)
 
         # Process results after crawl completes
-        d.addCallback(lambda _: self._process_results(results))
-        d.addErrback(lambda error: print(f"Error in spider: {error}"))
+        # d.addCallback(lambda _: self._process_results(results))
+        # d.addErrback(lambda error: print(f"Error in spider: {error}"))
 
     def _process_results(self, results):
         if results:
