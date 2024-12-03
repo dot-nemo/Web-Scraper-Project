@@ -37,7 +37,7 @@ class EmailSpider(scrapy.Spider):
       self.channel = connection.channel()
 
       self.channel.queue_declare(queue='equeue')
-      print("Connected to RabbitMQ")
+      # print("Connected to RabbitMQ")
     except:
       print("Unable to connect to RabbitMQ")
 
