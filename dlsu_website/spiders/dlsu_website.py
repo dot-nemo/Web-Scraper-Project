@@ -73,7 +73,6 @@ class WebsiteSpider(scrapy.Spider):
             print(" [x] Sent '%s'", path)
           except:
             pass
-          print(path)
           website_queue.put(path)
           self.todo_list.append(path)
       except:
